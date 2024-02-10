@@ -13,8 +13,10 @@ def pad(byte, pad_size):
     return byte.to_bytes() * pad_size
 
 def strip_pkcs7_pad(block, block_size=16):
-    # check last byte
-    last_byte = block[-1]
-    if last_byte > 0 and last_byte < block_size:
-        return block[0:(-1*last_byte)]
+    block_len = len(block)
+    if block_len % block_size == 0:
+        # check last byte
+        last_byte = block[-1]
+        if last_byte > 0 and last_byte < block_size:
+            return block[0:(-1*last_byte)]
     return block

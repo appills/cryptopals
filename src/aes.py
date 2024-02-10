@@ -20,7 +20,6 @@ def ecb_mode_decrypt(key, c_buf) -> bytes:
     return d.update(c_buf) + d.finalize()
 
 def cbc_mode_encrypt(key: bytes, p_buf: bytes, iv: bytes):
-    p_buf = padding.pkcs7_pad(p_buf)
     num_blocks = int(len(p_buf) / 16)
     c_blocks = [bytearray(16)]*num_blocks # will yield this many ciphertext blocks
     for i in range(0, num_blocks):
@@ -39,11 +38,6 @@ def cbc_mode_decrypt(key: bytes, c_buf: bytes, iv: bytes):
         dec_c = ecb_mode_decrypt(key, c) # decrypt the block
         p_blocks[i] = xorcipher.array_xor(iv, dec_c) # xor with the IV
         iv = c # update for next iv
-    
-    # check if the last block is padded
-    last_block = p_blocks[-1]
-    # check it
-    p_blocks[-1] = padding.strip_pkcs7_pad(last_block)
     return combine_blocks(p_blocks)
 
 def combine_blocks(blocks):
