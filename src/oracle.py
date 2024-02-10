@@ -38,3 +38,6 @@ class EncryptionOracle:
             c_buf = aes.cbc_mode_encrypt(key, plaintext, token_bytes(16))
             self.ciphertexts['cbc'].append(c_buf)
         return c_buf
+    
+    def get_ciphertexts(self):
+        return self.ciphertexts

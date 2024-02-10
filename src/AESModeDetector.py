@@ -1,7 +1,7 @@
 
 class AESModeDetector:
 
-    def detect_ecb_mode(self, c_buf, block_size=32):
+    def detect_ecb_mode(self, c_buf, block_size=16):
         '''
         ECB MODE: 
         the same 16 bytes of plaintext will yield the same 16 bytes of ciphertext under K

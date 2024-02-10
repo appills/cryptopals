@@ -100,23 +100,23 @@ class Set1Test(unittest.TestCase):
             expected=fh.read()
         self.assertEqual(expected,actual)
         
-    # TODO finish assertion
+    # detect ECB mode
     def test_set1_challenge8(self):
         byte_blocks = []
         with open("./tests/fixtures/set_1_challenge_8.txt", 'r') as fh:
-            byte_blocks = [line.strip() for line in fh]
+            byte_blocks = [bytecodec.hex_to_bytes(line.strip()) for line in fh]
         block_guess = 0
         detector = AESModeDetector()
         for c_buf in byte_blocks:
             block_guess+=1
             # chunk into blocks of 16
             # check if any of the blocks in ten_blocks collide with each other
-            result = detector.detect_ecb_mode(c_buf, 32)
+            result = detector.detect_ecb_mode(c_buf, 16)
             if result['ecb'] == True:
                 detected = block_guess
                 actual = result
         
         # block 133
         self.assertEqual(133, detected)
-        self.assertEqual('08649af70dc06f4fd5d2d69c744cd283', actual['block'])
         self.assertEqual(4, actual['frequency'])
+        self.assertEqual(bytecodec.hex_to_bytes('08649af70dc06f4fd5d2d69c744cd283'), actual['block'])
