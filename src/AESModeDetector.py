@@ -4,10 +4,8 @@ class AESModeDetector:
     def detect_ecb_mode(self, c_buf, block_size=16):
         '''
         ECB MODE: 
-        the same 16 bytes of plaintext will yield the same 16 bytes of ciphertext under K
+        the same block_size bytes of plaintext will yield the same 16 bytes of ciphertext under K
         because of AES, K can be any of the following: 128, 192, 256 bits (16, 24, 32 bytes)
-        each line is 320 hex 160 bytes, so...
-        guess key of 16, 24, 32 bytes & use detect code from #6
         '''
         d = dict()
         for block in self.break_off_block(c_buf, block_size):

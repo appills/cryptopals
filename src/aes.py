@@ -1,5 +1,5 @@
-import src.padding as padding
 import src.xor as xorcipher
+
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 
 '''

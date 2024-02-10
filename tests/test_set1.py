@@ -102,6 +102,10 @@ class Set1Test(unittest.TestCase):
         
     # detect ECB mode
     def test_set1_challenge8(self):
+        '''
+        each line is 320 hex 160 bytes, so...
+        guess key of 16, 24, 32 bytes & use detect code from #6
+        '''
         byte_blocks = []
         with open("./tests/fixtures/set_1_challenge_8.txt", 'r') as fh:
             byte_blocks = [bytecodec.hex_to_bytes(line.strip()) for line in fh]

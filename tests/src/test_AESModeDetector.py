@@ -12,6 +12,7 @@ class AESModeDetectorTest(unittest.TestCase):
     def testAESModeDetector(self):
         key = token_bytes(16)
         # needs at least 3 repeated blocks to detect correctly?
+        # update: duh its an oracle you're allowed to use chosen plaintext attacks
         plaintext = b'YELLOW SUBMARINE'*3
         oracle = EncryptionOracle(key)
         for i in range(0, 100):
