@@ -6,6 +6,7 @@ import src.utils.filereader as filereader
 
 from src.scoring import PlaintextScoreCalculator
 from src.RepeatingKeyDetector import RepeatingKeyDetector
+from src.AESModeDetector import AESModeDetector
 
 # bytes are readonly, bytearrays are read-write.
 class Set1Test(unittest.TestCase):
@@ -103,34 +104,19 @@ class Set1Test(unittest.TestCase):
     def test_set1_challenge8(self):
         byte_blocks = []
         with open("./tests/fixtures/set_1_challenge_8.txt", 'r') as fh:
-            byte_blocks = [line.rstrip() for line in fh]
-        # to attack:
-        # the same 16 bytes of plaintext will yield the same 16 bytes of ciphertext under K
-        # because of AES, K can be any of the following: 128, 192, 256 bits (16, 24, 32 bytes)
-        # each line is 320 hex 160 bytes, so...
-        # guess key of 16, 24, 32 bytes & use detect code from #6
+            byte_blocks = [line.strip() for line in fh]
         block_guess = 0
+        detector = AESModeDetector()
         for c_buf in byte_blocks:
             block_guess+=1
             # chunk into blocks of 16
             # check if any of the blocks in ten_blocks collide with each other
-            d = dict()
-            for block in self.break_off_block(c_buf, 32):
-                if block in d.keys():
-                    d[block] += 1
-                else:
-                    d[block] = 1
-            d[''] = 0 # todo debug why this happens
-            for k in d.keys():
-                if d[k] > 1:
-                    print(d)
-                    print(block_guess)
-                    break
-                    
-    def break_off_block(self, blocks, size):
-        i = 1
-        prev = 0
-        while i < len(blocks):
-            yield blocks[prev*size:i*size]
-            prev = i
-            i +=1
+            result = detector.detect_ecb_mode(c_buf, 32)
+            if result['ecb'] == True:
+                detected = block_guess
+                actual = result
+        
+        # block 133
+        self.assertEqual(133, detected)
+        self.assertEqual('08649af70dc06f4fd5d2d69c744cd283', actual['block'])
+        self.assertEqual(4, actual['frequency'])
