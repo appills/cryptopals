@@ -20,10 +20,13 @@ class EncryptionOracle:
         we should be able to detect ecb on all self.ciphertexts['ecb']
         and fail to detect ecb on all self.ciphertexts['cbc']
     '''
-    def encrypt(self, plaintext, key):
+    def __init__(self):
+        self.key = generate_key(16)
+
+    def encrypt(self, plaintext):
         # pretty sure exclusive
         plaintext = pkcs7_pad(plaintext)
-        c_buf = aes.ecb_mode_encrypt(key, plaintext)
+        c_buf = aes.ecb_mode_encrypt(self.key, plaintext)
         return c_buf
     
     def randomly_encrypt(self, plaintext):
