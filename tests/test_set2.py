@@ -27,10 +27,10 @@ class Set2Test(unittest.TestCase):
             plaintext = fh.read()
         self.assertEqual(plaintext, padding.strip_pkcs7_pad(actual))
         
-    def test_set3_challenge11(self):
+    def test_set2_challenge11(self):
         self.assertEqual('See ./tests/src/test_AESModeDetector.py', 'See ./tests/src/test_AESModeDetector.py')
 
-    def test_set3_challenge12(self):
+    def test_set2_challenge12(self):
         expected = filereader.read_formatted_base64_file('./tests/fixtures/set_2_challenge_12.txt')
         secret_text = expected
         detector = AESModeDetector()
