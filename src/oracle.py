@@ -20,14 +20,17 @@ class EncryptionOracle:
         we should be able to detect ecb on all self.ciphertexts['ecb']
         and fail to detect ecb on all self.ciphertexts['cbc']
     '''
-    def __init__(self, key):
-        self.key = key
+    def encrypt(self, plaintext, key):
+        # pretty sure exclusive
+        plaintext = pkcs7_pad(plaintext)
+        c_buf = aes.ecb_mode_encrypt(key, plaintext)
+        return c_buf
+    
+    def randomly_encrypt(self, plaintext):
         self.ciphertexts = {
             'ecb': [],
             'cbc': []
         }
-    
-    def encrypt(self, plaintext):
         key = generate_key(16)
         # pretty sure exclusive
         plaintext = pkcs7_pad(token_bytes(randrange(5, 11)) + plaintext + token_bytes(randrange(5, 11)))
@@ -38,6 +41,8 @@ class EncryptionOracle:
             c_buf = aes.cbc_mode_encrypt(key, plaintext, token_bytes(16))
             self.ciphertexts['cbc'].append(c_buf)
         return c_buf
-    
+
     def get_ciphertexts(self):
         return self.ciphertexts
+    
+    
