@@ -1,9 +1,8 @@
 import unittest
 
-from secrets import token_bytes
+from src.utils.filereader import read_formatted_base64_file
 from src.AESModeDetector import AESModeDetector
 from src.oracle import EncryptionOracle
-from src.utils.filereader import read_formatted_base64_file
 
 class AESModeDetectorTest(unittest.TestCase):
     
