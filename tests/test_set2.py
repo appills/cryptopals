@@ -2,9 +2,7 @@ import unittest
 import src.padding as padding
 import src.aes as aes
 import src.utils.filereader as filereader
-import src.utils.bytecodec as bytecodec
 
-from secrets import token_bytes
 from src.oracle import EncryptionOracle
 from src.AESModeDetector import AESModeDetector
 
@@ -49,9 +47,10 @@ class Set2Test(unittest.TestCase):
         e.g. [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0] + [(?) ? ? ? ? ? ? ? ? ? ? ? ? ? ? ? ...]
         create a dict of every possible last byte where the keys are the ciphertext and the vals are the last byte
         e.g. [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1] ... [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 255]
-        encrypt (one_byte_short + secret_text) and take the first block: [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 ?]
+        SUBROUTINE:
+        encrypt (one_byte_short + secret_text[:1]) and take the first_block of the ciphertext [0:16]
         check the ciphertext dictionary for a match for first_block
-        remove that first byte from the secret_text and do the process all over
+        remove that first byte from the secret_text & GOTO SUBROUTINE
         '''
         ciphertext_dict = dict()
         for i in range(0,255):
@@ -59,7 +58,7 @@ class Set2Test(unittest.TestCase):
 
         plaintext_bytes = []
         while len(secret_text) > 0:
-            c_buf = oracle.encrypt(one_byte_short + secret_text)
+            c_buf = oracle.encrypt(one_byte_short + secret_text[:1])
             plaintext_bytes.append(ciphertext_dict[c_buf[0:16]])
             secret_text = secret_text[1:]
         plaintext = b''.join([i.to_bytes() for i in plaintext_bytes])
