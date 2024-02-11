@@ -1,3 +1,4 @@
+from src.oracle import EncryptionOracle
 
 class AESModeDetector:
 
@@ -34,3 +35,12 @@ class AESModeDetector:
             yield y
             prev = i
             i +=1
+    
+    def detect_block_size(self, secret_string, oracle: EncryptionOracle):
+        block_size = 1
+        c1_buf = oracle.encrypt(secret_string)
+        c2_buf = oracle.encrypt((block_size * b'\x00') + secret_string)
+        while len(c1_buf) == len(c2_buf):
+            block_size +=1
+            c2_buf = oracle.encrypt((block_size * b'\x00') + secret_string)
+        return len(c2_buf) - len(c1_buf)
