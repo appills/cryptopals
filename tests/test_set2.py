@@ -64,6 +64,18 @@ class Set2Test(unittest.TestCase):
         plaintext = b''.join([i.to_bytes() for i in plaintext_bytes])
         self.assertEqual(expected, plaintext) # cool af
 
+    def test_set2_challenge13(self):
+        
+        return
+    
+    def test_set2_challenge14(self):
+        '''
+            find your bytes like a canary, make sure your blocks span 3 blocks
+            e.g. any number of random bytes || yours || target
+
+        '''
+
+
 
 
 
