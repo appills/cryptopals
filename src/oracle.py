@@ -6,6 +6,9 @@ from src.padding import pkcs7_pad
 def generate_key(size=16) -> bytes:
     return token_bytes(size)
 
+def random_number() -> int:
+    return int.from_bytes(token_bytes(1))
+
 def random_encryption_oracle(plaintext: bytes):
     key = generate_key(16)
     # pretty sure exclusive
@@ -22,6 +25,7 @@ class EncryptionOracle:
     '''
     def __init__(self):
         self.key = generate_key(16)
+        self.random_prefix = token_bytes(random_number())
 
     def encrypt(self, plaintext):
         # pretty sure exclusive
@@ -44,6 +48,12 @@ class EncryptionOracle:
             c_buf = aes.cbc_mode_encrypt(key, plaintext, token_bytes(16))
             self.ciphertexts['cbc'].append(c_buf)
         return c_buf
+
+    def randomly_prepend_and_encrypt(self, attacker_buf, secret_buf):
+        # random prefix is per instance, not per invocation
+        p_buf = b''.join([self.random_prefix, attacker_buf, secret_buf])
+        padded_buf = pkcs7_pad(p_buf)
+        return aes.ecb_mode_encrypt(self.key, padded_buf)
 
     def get_ciphertexts(self):
         return self.ciphertexts

@@ -3,6 +3,10 @@ import src.padding as padding
 import src.aes as aes
 import src.utils.filereader as filereader
 
+from secrets import token_bytes
+from src.padding import pkcs7_pad
+from src.utils.bytecodec import bytes_to_utf8
+from src.UserProfile import UserProfile
 from src.oracle import EncryptionOracle
 from src.AESModeDetector import AESModeDetector
 
@@ -65,22 +69,93 @@ class Set2Test(unittest.TestCase):
         self.assertEqual(expected, plaintext) # cool af
 
     def test_set2_challenge13(self):
-        
+        key = token_bytes(16)
+        profile = UserProfile(key)
+        '''
+            we're going to use the cipher text of this:
+                email=aaaaaaaaaa
+                aaa&uid=10&role=
+                userxxxxxxxxxxxx    <------ this block will get replaced
+        '''
+        c_buf1 = profile.encrypted_profile_for('a'*13)
+        '''
+            by replacing the last block (userxxxxxxxxxxxx)
+            with the second block of the cipher text of:
+                email=aaaaaaaaaa
+                adminxxxxxxxxxxx    <------ this block is the replacement
+                uid=10&role=user
+        '''
+        admin_padded_buf = (b'a'*10) + pkcs7_pad(b'admin')
+        c_buf2 = profile.encrypted_profile_for(bytes_to_utf8(admin_padded_buf))
+
+        payload = b''.join([c_buf1[0:16], c_buf1[16:32], c_buf2[16:32]])
+        decrypted = profile.decrypt_profile(payload)
+        expected = {
+            'email': 'aaaaaaaaaaaaa',
+            'uid': '10',
+            'role': 'admin'
+        }
+        self.assertEqual(expected, decrypted)
         return
     
     def test_set2_challenge14(self):
+        expected = filereader.read_formatted_base64_file('./tests/fixtures/set_2_challenge_12.txt')
+        secret_text = expected
+        oracle = EncryptionOracle()
         '''
-            find your bytes like a canary, make sure your blocks span 3 blocks
-            e.g. any number of random bytes || yours || target
-
+        Add bytes until I get repeated blocks
+        then I know how many bytes I need to separate the prepended bytes and the secret text
+        then I repeat the attack from #12
         '''
-
-
-
-
-
-
-
-
+        found_repeat_blocks = False
+        count = 1
+        while not found_repeat_blocks:
+            chunks = dict()
+            attack = b'\x00'*count
+            c_buf = oracle.randomly_prepend_and_encrypt(attack, secret_text)
+            c_blocks = self.chunk_text(c_buf, 16)
+            block_num = 0
+            for block in c_blocks:
+                if block in chunks.keys():
+                    found_repeat_blocks = True
+                    attack_len = len(attack)
+                    break
+                else:
+                    chunks[block] = 1
+                    block_num+=1
+            count+=1
 
         
+        '''
+        sure its ugly but it works and thats what
+        '''
+        start_index_of_secret_text = block_num*16
+        start_index_of_chosen_text = start_index_of_secret_text-attack_len
+        one_byte_short = b'\x00'*(attack_len-1)
+        possible_ciphertexts = dict()
+        for i in range(0,255):
+            c_buf = oracle.randomly_prepend_and_encrypt(one_byte_short + i.to_bytes(), secret_text)
+            block_to_inspect = c_buf[start_index_of_chosen_text:]
+            possible_ciphertexts[block_to_inspect] = i
+
+        plaintext_bytes = []
+        hold_text = secret_text
+        while len(secret_text) > 0:
+            c_buf = oracle.randomly_prepend_and_encrypt(one_byte_short + secret_text[:1], hold_text)
+            block_to_inspect = c_buf[start_index_of_chosen_text:]
+            plaintext_bytes.append(possible_ciphertexts[block_to_inspect])
+            secret_text = secret_text[1:]
+        plaintext = b''.join([i.to_bytes() for i in plaintext_bytes])
+        self.assertEqual(expected, plaintext) # cool af
+
+        return
+    def test_set2_challenge15(self):
+        return
+    def test_set2_challenge16(self):
+        return
+    
+    def chunk_text(self, c_buf, size=16):
+        blocks = []
+        for i in range(0, len(c_buf), 16):
+            blocks.append(c_buf[i:(i+size)])
+        return blocks
