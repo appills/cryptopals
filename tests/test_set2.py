@@ -148,9 +148,18 @@ class Set2Test(unittest.TestCase):
         plaintext = b''.join([i.to_bytes() for i in plaintext_bytes])
         self.assertEqual(expected, plaintext) # cool af
 
-        return
     def test_set2_challenge15(self):
-        return
+        cases = [
+            b'ICE ICE BABY\x04\x04\x04\x04',
+            b'ICE ICE BABY\x05\x05\x05\x05',
+            b'ICE ICE BABY\x01\x02\x03\x04'
+        ]
+        for c in cases:
+            try:
+                padding.throw_bad_padding(c)
+            except Exception as e:
+                self.assertRaises(Exception, e)
+
     def test_set2_challenge16(self):
         return
     
