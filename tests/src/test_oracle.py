@@ -74,10 +74,10 @@ class OracleTest(unittest.TestCase):
         block = c_blocks[2]
         fun_block = self.get_mutable_block(block)
         # goal is to now find bytes which result in the desired flip
-        desired = [i for i in ';admin=true;']
-        best_block = [fun_block[i] for i in range(0, 4)]
-        ith_position = 4
-        while len(desired) > 0:
+        desired = [i for i in ';admin=true;k=ve'] # change
+        best_block = [] #change
+        ith_position = 0 #change
+        while len(desired) > 0: 
             # pop from the head
             char = desired.pop(0)
             best_block.append(
@@ -96,11 +96,14 @@ class OracleTest(unittest.TestCase):
         for i in parsed:
             if i[0] == 'admin' and i[1] == 'true':
                 admin_found = True
+        mangled_chunks = self.chunk_text(mangled)
+        for i in mangled_chunks:
+            print(i)
         self.assertEqual(True, admin_found)                
 
     def get_desired_byte_for_character_at_pos(self, char, at_pos, fun_block, c_blocks) ->int:
         for i in range(1, 255):
-                bl = fun_block[0:4] + (i.to_bytes())*12
+                bl = (i.to_bytes())*16 #change
                 # at the at_pos position, look for char
                 c_blocks[2] = bl
                 flipped_c_buf = self.build_from_chunks(c_blocks)
@@ -108,6 +111,7 @@ class OracleTest(unittest.TestCase):
                 # chunk again, 4th block of plain, check at_pos index
                 flipped_blocks = self.chunk_text(decrypted)
                 if (flipped_blocks[3][at_pos] == ord(char)):
+                    print(f"searching for {char} at pos {at_pos}, got {i}")
                     return i
 
     def chunk_text(self, c_buf, size=16):

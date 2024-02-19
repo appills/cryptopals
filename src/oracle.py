@@ -76,18 +76,13 @@ class EncryptionOracle:
     def encode_user_input(self, prepend, user_input, append):
         return prepend + quote_plus(user_input) + append
     
-    def parse_encoded_message(self, message):
-        holder = []
+    def parse_encoded_message(self, message: str) -> list:
+        tuples = []
         key_value_pairs = message.split(';')
         for pairs in key_value_pairs:
             key_and_value = pairs.split('=')
-            '''
-            there is at least 1 byte that is not paired with a '='
-            after cbc bit flip
-            '''
-            if len(key_and_value) > 1:
-                holder.append((key_and_value[0], key_and_value[1]))
-        return holder
+            tuples.append((key_and_value[0], key_and_value[1]))
+        return tuples
     
     def find_admin_tuple(self, tups):
         for tup in tups:
