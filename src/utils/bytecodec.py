@@ -18,7 +18,7 @@ def base64_to_bytes(b64_str) -> bytes:
     return b64decode(b64_str)
 # bytes b'foobar' to utf-8 string ('foobar')
 def bytes_to_utf8(byts: bytes) -> str:
-    return bytes.decode(byts, 'utf-8') 
+    return bytes.decode(byts, 'utf-8', errors='replace') 
 # utf-8 string (e.g. 'foobar'), return bytes (b'foobar')
 def utf8_to_bytes(s: str) -> bytes:
     return s.encode('utf-8')
